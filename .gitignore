@@ -24,8 +24,6 @@ tables.h
 streams.h
 mkheader
 columns.h
-tpcds.idx.h
-tpcds.idx
 distcomp
 y.tab.h
 y.tab.c
