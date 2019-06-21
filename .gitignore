@@ -20,10 +20,8 @@
 *.app
 
 # Generated files
-tables.h
 streams.h
 mkheader
-columns.h
 distcomp
 y.tab.h
 y.tab.c
