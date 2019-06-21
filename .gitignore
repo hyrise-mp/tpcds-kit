@@ -20,7 +20,6 @@
 *.app
 
 # Generated files
-streams.h
 mkheader
 distcomp
 y.tab.h
