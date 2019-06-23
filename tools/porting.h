@@ -43,7 +43,8 @@
 #endif
 
 #ifdef USE_VALUES_H
-#include <values.h>
+// macOS fix: https://github.com/cartershanklin/hive-testbench/issues/3#issuecomment-307909263
+#include <limits.h>
 #endif
 
 #ifdef USE_LIMITS_H

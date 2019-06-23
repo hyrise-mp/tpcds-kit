@@ -33,6 +33,9 @@
  * Contributors:
  * Gradient Systems
  */ 
+// macOS fix: https://github.com/cartershanklin/hive-testbench/issues/3#issuecomment-307909263
+#define MAXINT INT_MAX
+
 #include "config.h"
 #include "porting.h"
 #include "nulls.h"

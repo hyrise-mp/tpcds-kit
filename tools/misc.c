@@ -42,7 +42,8 @@
 #include <ctype.h>
 #include <math.h>
 #ifndef USE_STDLIB_H
-#include <malloc.h>
+// macOS fix: https://github.com/cartershanklin/hive-testbench/issues/3#issuecomment-307909263
+#include <stdlib.h>
 #endif
 #include <fcntl.h>
 #ifdef AIX

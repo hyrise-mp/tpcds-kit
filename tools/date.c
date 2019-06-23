@@ -39,7 +39,8 @@
 #include "porting.h"
 #include <stdlib.h>
 #ifndef USE_STDLIB_H
-#include <malloc.h>
+// macOS fix: https://github.com/cartershanklin/hive-testbench/issues/3#issuecomment-307909263
+#include <stdlib.h>
 #endif
 #include <stdio.h>
 #include <math.h>
