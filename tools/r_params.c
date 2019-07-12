@@ -82,6 +82,7 @@ static int param_init = 0;
 #endif
 
 void tpcds_cleanup() {
+  printf("tpcds_cleanup called; future calls to tpcds functions will fail");
   for (int i = 0; options[i].name != NULL; i++)
   {
     void* p = params[options[i].index];
