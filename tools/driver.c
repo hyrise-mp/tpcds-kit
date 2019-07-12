@@ -323,7 +323,7 @@ gen_tbl (int tabid, ds_key_t kFirstRow, ds_key_t kRowCount)
 				fprintf(stderr, "ERROR: Load failed on %s!\n", getTableNameByID(tabid));
 				exit(-1);
 			}
-			row_stop(tabid);
+			tpcds_row_stop(tabid);
 	}
 	if (bIsVerbose)
 			fprintf(stderr, "Done    \n");	
@@ -358,7 +358,7 @@ validate_options(void)
 		if (get_int("CHILD") < 1) strcat(msg, "CHILD must be >= 1\n");
 	}
 
-	if (strlen(msg)) usage(NULL, msg);
+	if (strlen(msg)) tpcds_usage(NULL, msg);
 
 	return;
 }
@@ -399,7 +399,7 @@ main (int ac, char **av)
    tdef *pT;
    table_func_t *pF;
 	
-	process_options (ac, av);
+	tpcds_process_options (ac, av);
 	validate_options();
 	init_rand();
 
