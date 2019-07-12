@@ -43,11 +43,11 @@
 option_t options[] =
 {
 /* General Parmeters */
-{"PROG",OPT_STR|OPT_HIDE|OPT_SET,0, "DO NOT MODIFY" , NULL, "distcomp"}, 
-{"INPUT",OPT_STR,1, "read distributions from file <s>", NULL, ""}, 
-{"VERBOSE",OPT_FLG,2, "enable verbose output", NULL, "N"}, 
-{"HELP",OPT_FLG,3, "display this message", usage, "N"},
-{"OUTPUT",OPT_STR,4, "output the compiled distributions to <s>", NULL, "."}, 
+{"PROG",OPT_STR|OPT_HIDE|OPT_SET,0, "DO NOT MODIFY" , NULL, "distcomp"},
+{"INPUT",OPT_STR,1, "read distributions from file <s>", NULL, ""},
+{"VERBOSE",OPT_FLG,2, "enable verbose output", NULL, "N"},
+{"HELP",OPT_FLG,3, "display this message", tpcds_usage, "N"},
+{"OUTPUT",OPT_STR,4, "output the compiled distributions to <s>", NULL, "."},
 {"HEADER",OPT_STR,5, "output distribution index names to header file <s>", NULL, ""},
 {NULL}
 };

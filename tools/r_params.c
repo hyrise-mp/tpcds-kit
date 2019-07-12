@@ -45,6 +45,12 @@
 #include "r_params.h"
 #include "tdefs.h"
 #include "release.h"
+#include "dist.h"
+
+#include "w_web_sales.h"
+#include "w_store_sales.h"
+#include "w_catalog_sales.h"
+#include "misc.h"
 
 #define PARAM_MAX_LEN	80
 
@@ -59,7 +65,7 @@ option_t options[] =
 {"DISTRIBUTIONS", OPT_STR, 2, "read distributions from file <s>", NULL, "tester_dist.idx"}, 
 {"OUTDIR", OPT_STR, 3, "generate files in directory <s>", NULL, "./"}, 
 {"VERBOSE", OPT_FLG, 4, "enable verbose output", NULL, "N"}, 
-{"HELP", OPT_FLG, 5, "display this message", usage, "N"}, 
+{"HELP", OPT_FLG, 5, "display this message", tpcds_usage, "N"},
 {"scale", OPT_INT, 6, "set scale to <i>", NULL, "1"}, 
 NULL
 };
@@ -75,23 +81,42 @@ static int param_init = 0;
 #define OPTION_START '-'
 #endif
 
+void tpcds_cleanup() {
+  for (int i = 0; options[i].name != NULL; i++)
+  {
+    void* p = params[options[i].index];
+    if (p) {
+      free(p);
+    }
+  }
+
+  find_dist(NULL, 1);
+  gen_text(NULL, 0, 0, 0, 1);
+
+  mk_w_web_sales_master(NULL, 0, 1);
+  mk_w_web_sales_detail(NULL, 0, NULL, NULL, 1);
+  mk_w_store_sales_master(NULL, 0, 1);
+  mk_w_catalog_sales_master(NULL, 0, 1);
+}
+
+
 int read_file(char *param_name, char *option);
 int fnd_param(char *name);
 void  print_params(void);
 
 /*
  * Routine:  load_params()
- * Purpose:  
+ * Purpose:
  * Algorithm:
  * Data Structures:
  *
  * Params:
  * Returns:
- * Called By: 
- * Calls: 
+ * Called By:
+ * Calls:
  * Assumptions:
  * Side Effects:
- * TODO: 
+ * TODO:
  * 20010621 JMS shared memory not yet implemented
  */
 void
@@ -472,24 +497,24 @@ save_file(char *path)
 }
 
 /*
- * Routine: usage(char *param_name, char *msg)
+ * Routine: tpcds_usage(char *param_name, char *msg)
  * Purpose: display a usage message, with an optional error message
  * Algorithm:
  * Data Structures:
  *
  * Params:
  * Returns:
- * Called By: 
- * Calls: 
+ * Called By:
+ * Calls:
  * Assumptions:
  * Side Effects:
  * TODO: None
  */
 int
-usage (char *param_name, char *msg)
+tpcds_usage (char *param_name, char *msg)
 {
 	init_params();
-	
+
 	fprintf (stderr,
 		"%s Population Generator (Version %d.%d.%d%s)\n",
 		get_str("PROG"), VERSION, RELEASE, MODIFICATION, PATCH);
@@ -564,7 +589,7 @@ set_option(char *name, char *param)
 		{
 			if (o->action)
 				if (o->action(o->name, NULL) < 0)
-					usage(o->name, "Cannot process option");
+					tpcds_usage(o->name, "Cannot process option");
 			set_flg(name);
 		}
 		else
@@ -575,7 +600,7 @@ set_option(char *name, char *param)
 		if (o->action)
       {
 			if ((res = o->action(o->name, param)) < 0)
-				usage(NULL, "Bad parameter argument");
+				tpcds_usage(NULL, "Bad parameter argument");
 			else
 				sprintf(parse_int, "%d", res);
       }
@@ -587,7 +612,7 @@ set_option(char *name, char *param)
 		{
 			cp = strchr((param + 1), '"');
 			if (cp == NULL)	/* non-terminated string literal */
-				usage(NULL, "Non-terminated string");
+				tpcds_usage(NULL, "Non-terminated string");
 			*cp = '\0';
 			param += 1;
 		}
@@ -599,12 +624,12 @@ set_option(char *name, char *param)
 		}
 		if (o->action && strlen(param))
 			if (o->action(o->name, param) < 0)
-				usage(o->name, "Cannot process option");
+				tpcds_usage(o->name, "Cannot process option");
 		set_str(name, param);
 		res = 2;
 		break;
 	default:
-		fprintf(stderr, "Invalid option/type (%d/%s)\n", 
+		fprintf(stderr, "Invalid option/type (%d/%s)\n",
 		    o->flags & TYPE_MASK, o->name);
 		exit(0);
 		break;
@@ -616,21 +641,21 @@ set_option(char *name, char *param)
 }
 
 /*
- * Routine: process_options(int count, char **vector)
+ * Routine: tpcds_process_options(int count, char **vector)
  * Purpose:  process a set of command line options
  * Algorithm:
  * Data Structures:
  *
  * Params:
  * Returns:
- * Called By: 
- * Calls: 
+ * Called By:
+ * Calls:
  * Assumptions:
  * Side Effects:
  * TODO: 20000309 need to return integer to allow processing of left-over args
  */
 int
-process_options (int count, char **vector)
+tpcds_process_options (int count, char **vector)
 {
 	int option_num = 1,
 	res = 1;
@@ -644,15 +669,15 @@ process_options (int count, char **vector)
 			if (option_num == (count - 1))
 				res = set_option(vector[option_num] + 1, NULL);
 			else
-				res = set_option(vector[option_num] + 1, 
+				res = set_option(vector[option_num] + 1,
 				    vector[option_num + 1]);
 		}
 
 		if (res < 0)
 		{
-			printf ("ERROR: option '%s' or its argument unknown.\n", 
+			printf ("ERROR: option '%s' or its argument unknown.\n",
 			    (vector[option_num] + 1));
-			usage (NULL, NULL);
+			tpcds_usage (NULL, NULL);
 			exit (1);
 		}
 		else
@@ -948,6 +973,6 @@ main()
 	clr_flg("VERBOSE");
 	printf("DIST is %s\n", get_str("DISTRIBUTIONS"));
 	print_params();
-	usage(NULL, NULL);
+	tpcds_usage(NULL, NULL);
 }
 #endif /* TEST_PARAMS */

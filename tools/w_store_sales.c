@@ -65,15 +65,23 @@ static ds_key_t jDate,
 /*
 * mk_store_sales
 */
-static void
-mk_master (void *row, ds_key_t index)
+void
+mk_w_store_sales_master (void *row, ds_key_t index, int should_reset)
 {
 	struct W_STORE_SALES_TBL *r;
 	static decimal_t dMin,
 		dMax;
 	static int bInit = 0,
-		nMaxItemCount;
+    nMaxItemCount;
 	static ds_key_t kNewDateIndex = 0;
+
+	if (should_reset) {
+	  bInit = 0;
+	  if (pItemPermutation) {
+	    free(pItemPermutation);
+	  }
+    return;
+	}
 
 	if (row == NULL)
 		r = &g_w_store_sales;
@@ -87,8 +95,8 @@ mk_master (void *row, ds_key_t index)
 		nMaxItemCount = 20;
 		jDate = skipDays(STORE_SALES, &kNewDateIndex);
 		pItemPermutation = makePermutation(NULL, nItemCount = (int)getIDCount(ITEM), SS_PERMUTATION);
-		
-		bInit = 1;
+
+    bInit = 1;
 	}
 
 	
@@ -111,8 +119,8 @@ mk_master (void *row, ds_key_t index)
 }
 
 
-static void
-mk_detail (void *row, int bPrint)
+void
+mk_w_store_sales_detail (void *row, int bPrint, void* store_returns, int* was_returned)
 {
 int nTemp;
 struct W_STORE_RETURNS_TBL ReturnRow;
@@ -141,7 +149,8 @@ tdef *pT = getSimpleTdefsByNumber(STORE_SALES);
 	genrand_integer(&nTemp, DIST_UNIFORM, 0, 99, 0, SR_IS_RETURNED);
 	if (nTemp < SR_RETURN_PCT)
 	{
-		mk_w_store_returns(&ReturnRow, 1);
+		mk_w_store_returns(store_returns, 1, r);
+		*was_returned = 1;
       if (bPrint)
          pr_w_store_returns(&ReturnRow);
 	}
@@ -237,19 +246,19 @@ ld_w_store_sales(void *pSrc)
 * mk_store_sales
 */
 int
-mk_w_store_sales (void *row, ds_key_t index)
+mk_w_store_sales (void *row, ds_key_t index, void* store_returns, int* was_returned)
 {
 	int nLineitems,
 		i;
 
    /* build the static portion of an order */
-	mk_master(row, index);
+  mk_w_store_sales_master(row, index, 0);
 
    /* set the number of lineitems and build them */
 	genrand_integer(&nLineitems, DIST_UNIFORM, 8, 16, 0, SS_TICKET_NUMBER);
    for (i = 1; i <= nLineitems; i++)
    {
-	   mk_detail(NULL, 1);
+	   mk_w_store_sales_detail(row, 0, store_returns, was_returned);
    }
 
    /**
@@ -283,14 +292,15 @@ vld_w_store_sales(int nTable, ds_key_t kRow, int *Permutation)
 	row_skip(nTable, kRow - 1);
 	row_skip(STORE_RETURNS, kRow - 1);
 	jDate = skipDays(STORE_SALES, &kNewDateIndex);		
-	mk_master(NULL, kRow);
+	mk_w_store_sales_master(NULL, kRow, 0);
 	genrand_integer(&nMaxLineitem, DIST_UNIFORM, 8, 16, 9, SS_TICKET_NUMBER);
 	genrand_integer(&nLineitem, DIST_UNIFORM, 1, nMaxLineitem, 0, SS_PRICING_QUANTITY);
+  printf("ERROR: interface of mk_w_store_sales_detail changed, adjust vld_w_store_sales");
 	for (i = 1; i < nLineitem; i++)
 	{
-		mk_detail(NULL, 0);
+		mk_w_store_sales_detail(NULL, 0, NULL, NULL);
 	}
-	mk_detail(NULL, 1);
+	mk_w_store_sales_detail(NULL, 1, NULL, NULL);
 
 	return(0);
 }

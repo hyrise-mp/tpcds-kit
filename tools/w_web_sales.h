@@ -36,6 +36,9 @@
 /*
  * WEB_SALES table structure 
  */
+
+#include "pricing.h"
+
 struct W_WEB_SALES_TBL {
 	ds_key_t	ws_sold_date_sk;
 	ds_key_t	ws_sold_time_sk;
@@ -71,8 +74,9 @@ struct W_WEB_SALES_TBL {
 #define WS_MIN_SHIP_DELAY	1			/* time between order date and ship date */
 #define WS_MAX_SHIP_DELAY	120
 
-
-int mk_w_web_sales(void *pDest, ds_key_t kIndex);
+void mk_w_web_sales_master (void *row, ds_key_t index, int should_reset);
+void mk_w_web_sales_detail (void *row, int bPrint, void* web_returns, int* was_returned, int should_reset);
+int mk_w_web_sales(void *pDest, ds_key_t kIndex, void* web_returns, int* was_returned);
 int pr_w_web_sales(void *pSrc);
 int ld_w_web_sales(void *pSrc);
 int vld_web_sales(int nTable, ds_key_t kRow, int *Permutation);

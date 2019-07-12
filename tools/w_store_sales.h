@@ -57,7 +57,9 @@ struct W_STORE_SALES_TBL {
 	ds_pricing_t	ss_pricing;
 };
 
-int mk_w_store_sales(void *pDest, ds_key_t kIndex);
+void mk_w_store_sales_master (void *row, ds_key_t index, int should_reset);
+void mk_w_store_sales_detail (void *row, int bPrint, void* store_returns, int* was_returned);
+int mk_w_store_sales(void *pDest, ds_key_t kIndex, void* store_returns, int* was_returned);
 int pr_w_store_sales(void *pSrc);
 int ld_w_store_sales(void *pSrc);
 int vld_w_store_sales(int nTable, ds_key_t kRow, int *Permutation);

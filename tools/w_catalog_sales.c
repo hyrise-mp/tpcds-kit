@@ -62,15 +62,14 @@ static ds_key_t jDate;
 static int nTicketItemBase = 1;
 static int *pItemPermutation;
 static int nItemCount;
-                                                              
-                                                              
+
 /*                                                            
  * the validation process requires generating a single lineitem
  * so the main mk_xxx routine has been split into a master record portion   
  * and a detail/lineitem portion.                             
  */                                                           
-static void                                                   
-mk_master (void *row, ds_key_t index)                         
+void
+mk_w_catalog_sales_master (void *row, ds_key_t index, int should_reset)
 {                                      
 	static decimal_t dZero,
 		dHundred,
@@ -79,6 +78,13 @@ mk_master (void *row, ds_key_t index)
 	struct W_CATALOG_SALES_TBL *r;
 	static int bInit = 0;
 
+	if (should_reset) {
+	  bInit = 0;
+	  if (pItemPermutation) {
+	    free(pItemPermutation);
+	  }
+	  return;
+	}
 
 	if (row == NULL)
 		r = &g_w_catalog_sales;
@@ -94,7 +100,7 @@ mk_master (void *row, ds_key_t index)
 		jDate = skipDays(CATALOG_SALES, &kNewDateIndex);
 		pItemPermutation = makePermutation(NULL, (nItemCount = (int)getIDCount(ITEM)), CS_PERMUTE);
 
-		bInit = 1;
+    bInit = 1;
 	}
 
    while (index > kNewDateIndex)	/* need to move to a new date */
@@ -154,8 +160,8 @@ mk_master (void *row, ds_key_t index)
       return;
 }
 
-static void
-mk_detail(void *row, int bPrint)
+void
+mk_w_catalog_sales_detail(void *row, int bPrint, void* catalog_returns, int* was_returned)
 {
 	static decimal_t dZero,
 		dHundred,
@@ -220,7 +226,8 @@ mk_detail(void *row, int bPrint)
 	genrand_integer(&nTemp, DIST_UNIFORM, 0, 99, 0, CR_IS_RETURNED);
 	if (nTemp < CR_RETURN_PCT)
 	{
-		mk_w_catalog_returns(NULL, 1);
+		mk_w_catalog_returns(catalog_returns, 1, r);
+		*was_returned = 1;
       if (bPrint)
          pr_w_catalog_returns(NULL);
 	}
@@ -251,12 +258,12 @@ mk_detail(void *row, int bPrint)
 * 20020902 jms Should promos be tied to item id?
 */
 int
-mk_w_catalog_sales (void* row, ds_key_t index)
+mk_w_catalog_sales (void* row, ds_key_t index, void* catalog_returns, int* was_returned)
 {
    int nLineitems,
       i;
 
-   mk_master(row, index);
+   mk_w_catalog_sales_master(row, index, 0);
 
    /*
     * now we select the number of lineitems in this order, and loop through them, printing
@@ -265,7 +272,7 @@ mk_w_catalog_sales (void* row, ds_key_t index)
    genrand_integer(&nLineitems, DIST_UNIFORM, 4, 14, 0, CS_ORDER_NUMBER);
    for (i=1; i <= nLineitems; i++)
    {
-      mk_detail(NULL, 1);
+      mk_w_catalog_sales_detail(row, 0, catalog_returns, was_returned);
    }
 
    /**
@@ -389,14 +396,15 @@ vld_w_catalog_sales(int nTable, ds_key_t kRow, int *Permutation)
 	row_skip(nTable, kRow - 1);
 	row_skip(CATALOG_RETURNS, (kRow - 1) );
 	jDate = skipDays(CATALOG_SALES, &kNewDateIndex);		
-	mk_master(NULL, kRow);
+	mk_w_catalog_sales_master(NULL, kRow, 0);
 	genrand_integer(&nMaxLineitem, DIST_UNIFORM, 4, 14, 9, CS_ORDER_NUMBER);
 	genrand_integer(&nLineitem, DIST_UNIFORM, 1, nMaxLineitem, 0, CS_PRICING_QUANTITY);
+  printf("ERROR: interface of mk_w_catalog_sales_detail changed, adjust vld_w_catalog_sales");
 	for (i = 1; i < nLineitem; i++)
 	{
-		mk_detail(NULL, 0);
+		mk_w_catalog_sales_detail(NULL, 0, NULL, NULL);
 	}
-   mk_detail(NULL, 1);
+   mk_w_catalog_sales_detail(NULL, 1, NULL, NULL);
 
 	return(0);
 }

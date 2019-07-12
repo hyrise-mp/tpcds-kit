@@ -61,22 +61,26 @@ static ds_key_t kNewDateIndex = 0;
 static ds_key_t jDate;
 static int nItemIndex = 0;
 
-
 /*
  * the validation process requires generating a single lineitem
  * so the main mk_xxx routine has been split into a master record portion
  * and a detail/lineitem portion.
  */
-static void
-mk_master (void *row, ds_key_t index)
+void
+mk_w_web_sales_master (void *row, ds_key_t index, int should_reset)
 {
    static decimal_t dMin,
       dMax;
    int nGiftPct;
    struct W_WEB_SALES_TBL *r;
    static int bInit = 0,
-	   nItemCount;
-	
+          nItemCount;
+
+  if (should_reset) {
+    bInit = 0;
+    return;
+  }
+
 	if (row == NULL)
 		r = &g_w_web_sales;
 	else
@@ -88,7 +92,7 @@ mk_master (void *row, ds_key_t index)
 		strtodec (&dMax, "100000.00");
 		jDate = skipDays(WEB_SALES, &kNewDateIndex);	
 		nItemCount = (int)getIDCount(ITEM);
-		bInit = 1;
+    bInit = 1;
 	}
 		
 	
@@ -137,25 +141,33 @@ mk_master (void *row, ds_key_t index)
 return;
 }
 
-static void
-mk_detail (void *row, int bPrint)
+
+void
+mk_w_web_sales_detail (void *row, int bPrint, void* web_returns, int* was_returned, int should_reset)
 {
-	static int *pItemPermutation,
-		nItemCount,
-		bInit = 0;
+  static int *pItemPermutation,
+  	      nItemCount,
+          bInit = 0;
 	struct W_WEB_SALES_TBL *r;
 	int nShipLag,
 		nTemp;
    struct W_WEB_RETURNS_TBL w_web_returns;
    tdef *pT = getSimpleTdefsByNumber(WEB_SALES);
 
+  if (should_reset) {
+    bInit = 0;
+    if (pItemPermutation) {
+      free(pItemPermutation);
+    }
+    return;
+  }
 
 	if (!bInit)
 	{
 		jDate = skipDays(WEB_SALES, &kNewDateIndex);
-		pItemPermutation = makePermutation(NULL, nItemCount = (int)getIDCount(ITEM), WS_PERMUTATION);
-		
-		bInit = 1;
+    pItemPermutation = makePermutation(NULL, nItemCount = (int)getIDCount(ITEM), WS_PERMUTATION);
+
+    bInit = 1;
 	}
 
 	if (row == NULL)
@@ -192,7 +204,8 @@ mk_detail (void *row, int bPrint)
       genrand_integer(&nTemp, DIST_UNIFORM, 0, 99, 0, WR_IS_RETURNED);
       if (nTemp < WR_RETURN_PCT)
       {
-         mk_w_web_returns(&w_web_returns, 1);
+         mk_w_web_returns(web_returns, 1, r);
+         *was_returned = 1;
          if (bPrint)
 			 pr_w_web_returns(&w_web_returns);
       }
@@ -210,19 +223,19 @@ mk_detail (void *row, int bPrint)
 * mk_web_sales
 */
 int
-mk_w_web_sales (void *row, ds_key_t index)
+mk_w_web_sales (void *row, ds_key_t index, void* web_returns, int* was_returned)
 {
 	int nLineitems,
 		i;
 
    /* build the static portion of an order */
-	mk_master(row, index);
+	mk_w_web_sales_master(row, index, 0);
 
    /* set the number of lineitems and build them */
 	genrand_integer(&nLineitems, DIST_UNIFORM, 8, 16, 9, WS_ORDER_NUMBER);
    for (i = 1; i <= nLineitems; i++)
    {
-	   mk_detail(NULL, 1);
+     mk_w_web_sales_detail(row, 0, web_returns, was_returned, 0);
    }
 
    /**
@@ -346,14 +359,15 @@ vld_web_sales(int nTable, ds_key_t kRow, int *Permutation)
 	row_skip(nTable, kRow - 1);
 	row_skip(WEB_RETURNS, (kRow - 1) );
 	jDate = skipDays(WEB_SALES, &kNewDateIndex);		
-	mk_master(NULL, kRow);
+	mk_w_web_sales_master(NULL, kRow, 0);
 	genrand_integer(&nMaxLineitem, DIST_UNIFORM, 8, 16, 9, WS_ORDER_NUMBER);
 	genrand_integer(&nLineitem, DIST_UNIFORM, 1, nMaxLineitem, 0, WS_PRICING_QUANTITY);
-	for (i = 1; i < nLineitem; i++)
+  printf("ERROR: interface of mk_w_web_sales_detail changed, adjust vld_web_sales");
+  for (i = 1; i < nLineitem; i++)
 	{
-		mk_detail(NULL, 0);
+		mk_w_web_sales_detail(NULL, 0, NULL, NULL, 0);
 	}
-   mk_detail(NULL, 1);
+   mk_w_web_sales_detail(NULL, 1, NULL, NULL, 0);
 
 	return(0);
 }
