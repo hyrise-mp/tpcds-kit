@@ -258,10 +258,11 @@ mk_w_catalog_sales_detail(void *row, int bPrint, void* catalog_returns, int* was
 * 20020902 jms Should promos be tied to item id?
 */
 int
-mk_w_catalog_sales (void* row, ds_key_t index, void* catalog_returns, int* was_returned)
+mk_w_catalog_sales (void* row, ds_key_t index)
 {
    int nLineitems,
-      i;
+      i,
+      was_returned;
 
    mk_w_catalog_sales_master(row, index, 0);
 
@@ -272,7 +273,7 @@ mk_w_catalog_sales (void* row, ds_key_t index, void* catalog_returns, int* was_r
    genrand_integer(&nLineitems, DIST_UNIFORM, 4, 14, 0, CS_ORDER_NUMBER);
    for (i=1; i <= nLineitems; i++)
    {
-      mk_w_catalog_sales_detail(row, 0, catalog_returns, was_returned);
+      mk_w_catalog_sales_detail(row, 0, NULL, &was_returned);
    }
 
    /**

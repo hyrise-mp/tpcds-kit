@@ -331,7 +331,7 @@ main(int ac, char* av[])
 {
 	template_t *pTemplate;
 
-	process_options (ac, av);
+	tpcds_process_options (ac, av);
 
 	if (!is_set("QUIET"))
 	{

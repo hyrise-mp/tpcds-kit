@@ -223,10 +223,11 @@ mk_w_web_sales_detail (void *row, int bPrint, void* web_returns, int* was_return
 * mk_web_sales
 */
 int
-mk_w_web_sales (void *row, ds_key_t index, void* web_returns, int* was_returned)
+mk_w_web_sales (void *row, ds_key_t index)
 {
 	int nLineitems,
-		i;
+		i,
+		was_returned;
 
    /* build the static portion of an order */
 	mk_w_web_sales_master(row, index, 0);
@@ -235,7 +236,7 @@ mk_w_web_sales (void *row, ds_key_t index, void* web_returns, int* was_returned)
 	genrand_integer(&nLineitems, DIST_UNIFORM, 8, 16, 9, WS_ORDER_NUMBER);
    for (i = 1; i <= nLineitems; i++)
    {
-     mk_w_web_sales_detail(row, 0, web_returns, was_returned, 0);
+     mk_w_web_sales_detail(row, 0, NULL, &was_returned, 0);
    }
 
    /**

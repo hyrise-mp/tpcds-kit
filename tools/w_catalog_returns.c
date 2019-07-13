@@ -103,7 +103,7 @@ mk_w_catalog_returns (void * row, ds_key_t index, void* catalog_sales)
 			row_skip(CATALOG_SALES, 1);
 			return(1);
 		}
-		mk_w_catalog_sales(&g_w_catalog_sales, index, NULL, NULL);
+		mk_w_catalog_sales(&g_w_catalog_sales, index);
 	}
 	
 	/*

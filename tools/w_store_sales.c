@@ -246,10 +246,11 @@ ld_w_store_sales(void *pSrc)
 * mk_store_sales
 */
 int
-mk_w_store_sales (void *row, ds_key_t index, void* store_returns, int* was_returned)
+mk_w_store_sales (void *row, ds_key_t index)
 {
 	int nLineitems,
-		i;
+		i,
+		was_returned;
 
    /* build the static portion of an order */
   mk_w_store_sales_master(row, index, 0);
@@ -258,7 +259,7 @@ mk_w_store_sales (void *row, ds_key_t index, void* store_returns, int* was_retur
 	genrand_integer(&nLineitems, DIST_UNIFORM, 8, 16, 0, SS_TICKET_NUMBER);
    for (i = 1; i <= nLineitems; i++)
    {
-	   mk_w_store_sales_detail(row, 0, store_returns, was_returned);
+	   mk_w_store_sales_detail(row, 0, NULL, &was_returned);
    }
 
    /**
