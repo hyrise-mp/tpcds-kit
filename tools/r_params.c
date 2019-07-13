@@ -45,6 +45,12 @@
 #include "r_params.h"
 #include "tdefs.h"
 #include "release.h"
+#include "dist.h"
+
+#include "w_web_sales.h"
+#include "w_store_sales.h"
+#include "w_catalog_sales.h"
+#include "misc.h"
 
 #define PARAM_MAX_LEN	80
 
@@ -74,6 +80,26 @@ static int param_init = 0;
 #else
 #define OPTION_START '-'
 #endif
+
+void tpcds_cleanup() {
+  printf("tpcds_cleanup called; future calls to tpcds functions will fail\n");
+  for (int i = 0; options[i].name != NULL; i++)
+  {
+    void* p = params[options[i].index];
+    if (p) {
+      free(p);
+    }
+  }
+
+  find_dist(NULL, 1);
+  gen_text(NULL, 0, 0, 0, 1);
+
+  mk_w_web_sales_master(NULL, 0, 1);
+  mk_w_web_sales_detail(NULL, 0, NULL, NULL, 1);
+  mk_w_store_sales_master(NULL, 0, 1);
+  mk_w_catalog_sales_master(NULL, 0, 1);
+}
+
 
 int read_file(char *param_name, char *option);
 int fnd_param(char *name);
