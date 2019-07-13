@@ -81,6 +81,7 @@ static int param_init = 0;
 #define OPTION_START '-'
 #endif
 
+#ifdef WITH_CLEANUP_FUNCTION
 void tpcds_cleanup() {
   printf("tpcds_cleanup called; future calls to tpcds functions will fail\n");
   for (int i = 0; options[i].name != NULL; i++)
@@ -99,6 +100,7 @@ void tpcds_cleanup() {
   mk_w_store_sales_master(NULL, 0, 1);
   mk_w_catalog_sales_master(NULL, 0, 1);
 }
+#endif
 
 
 int read_file(char *param_name, char *option);

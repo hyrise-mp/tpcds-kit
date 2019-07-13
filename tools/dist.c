@@ -157,7 +157,6 @@ find_dist(char *name, int should_free)
         safe_free(idx[j].dist->value_sets);
 
         safe_free(idx[j].dist);
-//        printf("freeing %s\n", idx[j].name); // TODO
       }
     }
 
