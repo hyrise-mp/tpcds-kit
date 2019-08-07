@@ -370,7 +370,11 @@ init_params(void)
 	{
 		params[options[i].index] = (char *)malloc(PARAM_MAX_LEN * sizeof(char));
 		MALLOC_CHECK(params[options[i].index]);
-		strncpy(params[options[i].index], options[i].dflt, 80);
+		if (strlen(options[i].dflt) + 1 > PARAM_MAX_LEN) {
+			printf("error - parameter too long: %s was set to %s, but must be shorter than %d characters\n", options[i].name, options[i].dflt, PARAM_MAX_LEN);
+			exit(1);
+		}
+		strcpy(params[options[i].index], options[i].dflt);
 		if (*options[i].dflt)
 			options[i].flags |= OPT_DFLT;
 	}
