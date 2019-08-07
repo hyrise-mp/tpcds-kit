@@ -52,7 +52,7 @@
 #include "w_catalog_sales.h"
 #include "misc.h"
 
-#define PARAM_MAX_LEN	80
+#define PARAM_MAX_LEN 150
 
 #ifndef TEST
 extern option_t options[];
@@ -303,6 +303,10 @@ set_str(char *var, char *val)
 	nParam = fnd_param(var);
 	if (nParam >= 0)
 	{
+		if (strlen(val) + 1 > PARAM_MAX_LEN) {
+			printf("error - parameter too long: %s was set to %s, but must be shorter than %d characters\n", var, val, PARAM_MAX_LEN);
+			exit(1);
+		}
 		strcpy(params[options[nParam].index], val);
 		options[nParam].flags |= OPT_SET;
 	}
