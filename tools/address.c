@@ -288,6 +288,7 @@ int mk_city(int nTable, char **dest)
 * Side Effects:
 * TODO: None
 */
+__attribute__((no_sanitize("signed-integer-overflow")))
 int
 city_hash(int nTable, char *name)
 {
