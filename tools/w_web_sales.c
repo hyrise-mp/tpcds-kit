@@ -145,7 +145,7 @@ return;
 void
 mk_w_web_sales_detail (void *row, int bPrint, void* web_returns, int* was_returned, int should_reset)
 {
-  static int *pItemPermutation,
+  static int *pItemPermutation = NULL,
   	      nItemCount,
           bInit = 0;
 	struct W_WEB_SALES_TBL *r;
@@ -158,6 +158,7 @@ mk_w_web_sales_detail (void *row, int bPrint, void* web_returns, int* was_return
     bInit = 0;
     if (pItemPermutation) {
       free(pItemPermutation);
+      pItemPermutation = NULL;
     }
     return;
   }

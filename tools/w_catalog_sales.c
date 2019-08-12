@@ -60,7 +60,7 @@ ds_key_t skipDays(int nTable, ds_key_t *pRemainder);
 static ds_key_t kNewDateIndex = 0;
 static ds_key_t jDate;
 static int nTicketItemBase = 1;
-static int *pItemPermutation;
+static int *pItemPermutation = NULL;
 static int nItemCount;
 
 /*                                                            
@@ -82,6 +82,7 @@ mk_w_catalog_sales_master (void *row, ds_key_t index, int should_reset)
 	  bInit = 0;
 	  if (pItemPermutation) {
 	    free(pItemPermutation);
+      pItemPermutation = NULL;
 	  }
 	  return;
 	}
