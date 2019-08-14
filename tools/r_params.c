@@ -89,6 +89,7 @@ void tpcds_cleanup() {
     void* p = params[options[i].index];
     if (p) {
       free(p);
+      p = NULL;
     }
   }
 

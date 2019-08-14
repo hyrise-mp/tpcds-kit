@@ -106,6 +106,7 @@ di_compare(const void *op1, const void *op2)
 static void safe_free(void* p) {
   if (p) {
     free(p);
+    p = NULL;
   }
 }
 

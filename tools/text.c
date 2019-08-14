@@ -74,6 +74,7 @@ mk_sentence(int stream, int should_free)
 	if (should_free) {
 	  if (verbiage) {
 	    free(verbiage);
+	    verbiage = NULL;
 	  }
 	  return NULL;
 	}
