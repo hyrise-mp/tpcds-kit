@@ -563,8 +563,9 @@ day_number(date_t *d)
  * Side Effects:
  * TODO: None
  */
+// HYRISE: Add parameter prototypes (C2x compatibility).
 int
-getDateWeightFromJulian(jDay, nDistribution)
+getDateWeightFromJulian(int jDay, int nDistribution)
 {
 	date_t dTemp;
 	int nDay;
