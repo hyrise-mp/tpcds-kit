@@ -146,8 +146,10 @@ getTdefsByNumber(int nTable)
 		return(&w_tdefs[nTable]);
 }
 */
+
+// HYRISE: Add parameter prototype (C2x compatibility).
 tdef *
-getSimpleTdefsByNumber(nTable)
+getSimpleTdefsByNumber(int nTable)
 {
    if (nTable >= S_BRAND)
       return(&s_tdefs[nTable - S_BRAND]);
